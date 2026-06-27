@@ -1,0 +1,59 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 0 1 220px;
+  min-width: 180px;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-faint);
+}
+
+.selectWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.select {
+  width: 100%;
+  appearance: none;
+  padding: 0.85rem 2.8rem 0.85rem 1rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--volt);
+  background: var(--bg-elev-2);
+}
+
+.chevron {
+  position: absolute;
+  right: 1rem;
+  width: 1.05rem;
+  height: 1.05rem;
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: color 0.18s var(--ease);
+}
+
+.selectWrap:focus-within .chevron {
+  color: var(--volt);
+}
+
+/* Native option list follows the page color scheme (dark) */
+.select option {
+  background: var(--bg-elev);
+  color: var(--text);
+}

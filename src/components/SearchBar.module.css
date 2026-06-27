@@ -1,0 +1,60 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-faint);
+}
+
+.inputWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.icon {
+  position: absolute;
+  left: 1rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  color: var(--text-faint);
+  pointer-events: none;
+  transition: color 0.18s var(--ease);
+}
+
+.input {
+  width: 100%;
+  padding: 0.85rem 1rem 0.85rem 2.9rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
+}
+
+.input::placeholder {
+  color: var(--text-faint);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--volt);
+  background: var(--bg-elev-2);
+}
+
+.inputWrap:focus-within .icon {
+  color: var(--volt);
+}
+
+/* Hide the native search clear button for a consistent look */
+.input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}

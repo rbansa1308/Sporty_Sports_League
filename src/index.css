@@ -1,0 +1,137 @@
+:root {
+  /* Surfaces — floodlit stadium at night */
+  --bg: #090b0e;
+  --bg-elev: #12161c;
+  --bg-elev-2: #1a2028;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.18);
+
+  /* Ink */
+  --text: #f3f5f7;
+  --text-muted: #8a95a3;
+  --text-faint: #5c6673;
+
+  /* Accents */
+  --volt: #d8ff3e;
+  --volt-dim: #aacc2f;
+  --ink-on-volt: #0a0c0f;
+  --ember: #ff5c38;
+
+  /* Type */
+  --font-display: "Anton", "Arial Narrow", sans-serif;
+  --font-body: "Archivo", system-ui, sans-serif;
+  --font-mono: "Spline Sans Mono", ui-monospace, monospace;
+
+  /* Shape & motion */
+  --radius: 14px;
+  --radius-sm: 9px;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --shadow: 0 18px 50px -20px rgba(0, 0, 0, 0.8);
+  --glow: 0 0 0 1px rgba(216, 255, 62, 0.5), 0 14px 40px -12px rgba(216, 255, 62, 0.28);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text);
+  background-color: var(--bg);
+  /* Floodlight glow from above + faint pitch grid + grain */
+  background-image:
+    radial-gradient(120% 80% at 50% -10%, rgba(216, 255, 62, 0.1), transparent 55%),
+    radial-gradient(80% 60% at 85% 0%, rgba(255, 92, 56, 0.07), transparent 60%),
+    linear-gradient(transparent 0, var(--bg) 70%),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.018) 0,
+      rgba(255, 255, 255, 0.018) 1px,
+      transparent 1px,
+      transparent 96px
+    );
+  background-attachment: fixed;
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--volt);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
