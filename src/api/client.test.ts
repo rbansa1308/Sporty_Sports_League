@@ -16,12 +16,19 @@ afterEach(() => {
 });
 
 describe("getAllLeagues", () => {
-  it("drops leagues with duplicate ids", async () => {
+  it("throws when every sport request fails", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network")));
+
+    await expect(getAllLeagues()).rejects.toThrow("network");
+  });
+
+  it("aggregates leagues across sports and dedupes by id", async () => {
+    // Every per-sport call returns the same two leagues, so the aggregated
+    // result must collapse to the two unique ids.
     mockFetchOnce({
-      leagues: [
-        { idLeague: "1", strLeague: "A", strSport: "Soccer", strLeagueAlternate: "" },
-        { idLeague: "1", strLeague: "A dup", strSport: "Soccer", strLeagueAlternate: "" },
-        { idLeague: "2", strLeague: "B", strSport: "Soccer", strLeagueAlternate: "" },
+      countries: [
+        { idLeague: "1", strLeague: "A", strSport: "Soccer", strLeagueAlternate: "x" },
+        { idLeague: "2", strLeague: "B", strSport: "Basketball", strLeagueAlternate: "y" },
       ],
     });
 

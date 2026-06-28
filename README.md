@@ -25,7 +25,7 @@ npm run typecheck  # tsc --noEmit
 ## Configuration
 
 The API key is read from `VITE_SPORTSDB_KEY` (see `.env.example`); it defaults to
-the public test key `3`. To use your own key:
+the documented free key `123`. To use your own key:
 
 ```bash
 cp .env.example .env
@@ -67,28 +67,35 @@ accessible focus handling (modal closes on Esc/overlay, focus is restored on clo
 
 This app targets three TheSportsDB endpoints:
 
-- `all_leagues.php` → list of leagues (`idLeague`, `strLeague`, `strSport`)
+- `search_all_leagues.php?s=<sport>` → leagues for a sport, with `strLeague`,
+  `strSport`, and `strLeagueAlternate` inline. The list is built by **aggregating
+  this endpoint across a curated set of sports** (see `SPORTS` in `client.ts`) and
+  deduping by `idLeague`.
 - `search_all_seasons.php?badge=1&id=<id>` → seasons with badge image URLs (the
   modal shows the **most recent** season that has a badge)
 - `lookupleague.php?id=<id>` → per-league detail; used by the modal for
-  `strDescriptionEN` (and it also carries `strLeagueAlternate`)
+  `strDescriptionEN`
+
+**Why aggregate?** The simpler `all_leagues.php` is capped at ~10 results on the
+free tier. Aggregating `search_all_leagues.php` per sport yields far more leagues
+(~60–70 across ~14 sports on the free key) **and** populates the sport dropdown
+and alternate league names — without a paid key.
 
 The modal loads the badge and the detail **in parallel** and degrades
 independently: a failure of one still shows the other, and the error/retry state
 appears only when both fail.
 
-**Free-key limitation:** with the public test key, `all_leagues.php` currently
-returns only a 10-league demo subset — all of them Soccer, and **without the
-`strLeagueAlternate` field** (that field is only returned by the per-league
-`lookupleague.php` endpoint). As a result, on the free key:
-
-- the **sport dropdown** contains only "Soccer", and
-- **alternate league names** are not shown (the UI renders them when present and
-  hides them when absent).
-
-The code is written for the full dataset: supplying a premium `VITE_SPORTSDB_KEY`
-makes the complete multi-sport catalog, alternate names, and richer sport filtering
-flow through unchanged — no code changes required.
+**Free-tier limitation (by design, per the docs):** TheSportsDB rate-limits the
+free tier to **30 requests/minute** and returns only a sampled subset per query
+(`all_leagues.php` is capped at a documented **"Free Limit: 10"**; the per-sport
+endpoint returns a similar small sample). The aggregation above works *around*
+this by combining many sports, yielding ~60–70 leagues across ~14 sports on the
+free key — not the literal full catalog, but a properly populated, multi-sport
+list. Supplying a **premium** `VITE_SPORTSDB_KEY` makes each per-sport query
+return its complete list, so the same code yields the full catalog with no
+changes. Because the initial load fans out one request per sport, a hard refresh
+within the same minute can brush against the 30/min limit. Docs:
+https://www.thesportsdb.com/documentation
 
 ## Testing
 

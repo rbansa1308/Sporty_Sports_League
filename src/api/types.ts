@@ -20,9 +20,10 @@ export interface LeagueDetail {
   strDescriptionEN: string | null;
 }
 
-/** Raw shapes of the API envelopes, used only at the client boundary. */
-export interface AllLeaguesResponse {
-  leagues: League[] | null;
+// Raw shapes of the API envelopes, used only at the client boundary.
+// `search_all_leagues.php` nests its league array under a "countries" key.
+export interface SearchLeaguesResponse {
+  countries: League[] | null;
 }
 
 export interface AllSeasonsResponse {

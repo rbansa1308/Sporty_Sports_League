@@ -1,15 +1,39 @@
 import { createCache } from "./cache";
 import type {
-  AllLeaguesResponse,
   AllSeasonsResponse,
   League,
   LeagueDetail,
   LookupLeagueResponse,
   Season,
+  SearchLeaguesResponse,
 } from "./types";
 
+// The free tier caps `all_leagues.php` at ~10 results, so we instead aggregate
+// the per-sport `search_all_leagues.php` endpoint across this curated list. That
+// yields far more leagues (and multiple sports) on the free key, and returns the
+// full per-sport catalog when a premium key is supplied.
+const SPORTS = [
+  "Soccer",
+  "Basketball",
+  "American Football",
+  "Ice Hockey",
+  "Baseball",
+  "Motorsport",
+  "Rugby",
+  "Golf",
+  "Tennis",
+  "Cricket",
+  "Cycling",
+  "Boxing",
+  "Volleyball",
+  "Handball",
+  "Australian Football",
+];
+
 // `||` (not `??`) so a defined-but-empty env value still falls back to the key.
-const API_KEY = import.meta.env.VITE_SPORTSDB_KEY || "3";
+// "123" is TheSportsDB's documented free key (capped at 10 leagues); a premium
+// key returns the full catalog.
+const API_KEY = import.meta.env.VITE_SPORTSDB_KEY || "123";
 const BASE_URL = `https://www.thesportsdb.com/api/v1/json/${API_KEY}`;
 
 // One cache per resource type. Leagues share a single key; per-league resources
@@ -26,16 +50,42 @@ async function fetchJson<T>(url: string): Promise<T> {
   return (await response.json()) as T;
 }
 
-/** All leagues, cached for the lifetime of the session. */
+/**
+ * All leagues, aggregated across the curated sport list and cached for the
+ * session. Sports are fetched in parallel and degrade independently — a failed
+ * or empty sport simply contributes nothing.
+ */
 export function getAllLeagues(): Promise<League[]> {
   return leaguesCache.getOrFetch("all", async () => {
-    const data = await fetchJson<AllLeaguesResponse>(`${BASE_URL}/all_leagues.php`);
-    return dedupeById(data.leagues ?? []);
+    const perSport = await Promise.allSettled(SPORTS.map(fetchLeaguesForSport));
+    const leagues = perSport.flatMap((result) =>
+      result.status === "fulfilled" ? result.value : [],
+    );
+
+    // Fail loudly if every sport request errored — surface an error + retry
+    // rather than a misleading empty grid. (All-empty-but-no-errors is a genuine
+    // empty result and is allowed through.)
+    if (leagues.length === 0) {
+      const rejected = perSport.find((result) => result.status === "rejected");
+      if (rejected?.status === "rejected") {
+        throw rejected.reason instanceof Error
+          ? rejected.reason
+          : new Error("Failed to load leagues");
+      }
+    }
+
+    return dedupeById(leagues);
   });
 }
 
-// TheSportsDB can return repeated league entries; drop duplicates so React keys
-// (and the rendered list) stay unique.
+function fetchLeaguesForSport(sport: string): Promise<League[]> {
+  return fetchJson<SearchLeaguesResponse>(
+    `${BASE_URL}/search_all_leagues.php?s=${encodeURIComponent(sport)}`,
+  ).then((data) => data.countries ?? []);
+}
+
+// The same league can surface under multiple sport queries; drop duplicates so
+// React keys (and the rendered list) stay unique.
 function dedupeById(leagues: League[]): League[] {
   const seen = new Set<string>();
   return leagues.filter((league) => {
