@@ -5,6 +5,7 @@
  */
 export interface Cache<T> {
   getOrFetch(key: string, fetcher: () => Promise<T>): Promise<T>;
+  evict(key: string): void;
 }
 
 export function createCache<T>(): Cache<T> {
@@ -22,6 +23,12 @@ export function createCache<T>(): Cache<T> {
 
       entries.set(key, pending);
       return pending;
+    },
+
+    // Lets callers drop a successfully-resolved-but-not-worth-keeping entry
+    // (e.g. an empty result) so a later request can try again.
+    evict(key) {
+      entries.delete(key);
     },
   };
 }

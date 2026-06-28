@@ -37,6 +37,19 @@ describe("createCache", () => {
     expect(fetcher).toHaveBeenCalledTimes(1);
   });
 
+  it("re-fetches after an entry is evicted", async () => {
+    const cache = createCache<number>();
+    const fetcher = vi.fn().mockResolvedValueOnce(1).mockResolvedValueOnce(2);
+
+    const first = await cache.getOrFetch("k", fetcher);
+    cache.evict("k");
+    const second = await cache.getOrFetch("k", fetcher);
+
+    expect(first).toBe(1);
+    expect(second).toBe(2);
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
+
   it("does not cache a rejected fetch, allowing a retry", async () => {
     const cache = createCache<number>();
     const fetcher = vi

@@ -27,6 +27,9 @@ calls.
 - Key: `VITE_SPORTSDB_KEY`, default public test key `3`.
 - All leagues: `all_leagues.php` → `{ leagues: League[] }`
 - Season badge: `search_all_seasons.php?badge=1&id=<id>` → `{ seasons: Season[] }`
+  (modal shows the **most recent** season with a badge)
+- League detail: `lookupleague.php?id=<id>` → `{ leagues: LeagueDetail[] }`, used
+  by the modal for `strDescriptionEN`
 - Docs: https://www.thesportsdb.com/free_sports_api
 - Exact response field names (e.g. badge image key) verified against the live API
   during implementation.
@@ -52,10 +55,12 @@ calls.
 
 ### Hooks (`src/hooks/`)
 - `useLeagues()` — loads all leagues once; exposes `{ data, loading, error }`.
-- `useSeasonBadge(leagueId)` — lazily fetches a league's badge on demand (only
-  when the modal opens); cached per league.
-- `useLeagueFilters(leagues)` — pure/memoized derivation of the filtered list and
-  the sport dropdown options from search text + selected sport.
+- `useLeagueModalData(leagueId)` — when the modal opens, loads the season badge
+  and league detail **in parallel** (`Promise.allSettled`); exposes
+  `{ badge, detail, loading, error, retry }`. The two calls degrade
+  independently — the error state appears only if both fail. Cached per league.
+- `useLeagueFilters(leagues, filters)` — pure/memoized derivation of the filtered
+  list and the sport dropdown options from search text + selected sport.
 
 ### Components (`src/components/`)
 - `App` — composes everything; owns filter state (search, selected sport,
@@ -64,8 +69,10 @@ calls.
 - `SportFilter` — dropdown; options derived from data.
 - `LeagueList` / `LeagueCard` — responsive grid; card shows `strLeague`,
   `strSport`, `strLeagueAlternate`; clickable.
-- `BadgeModal` — dialog; on open triggers `useSeasonBadge`; shows badge image +
-  league name/description; loading/error/empty states; closes on overlay/Esc.
+- `BadgeModal` — dialog; on open triggers `useLeagueModalData`; shows the
+  most-recent badge image + league name + season + `strDescriptionEN`;
+  loading/error/empty states with retry; focus trap + body-scroll lock; closes on
+  overlay/Esc with focus restore.
 - `StatusMessage` — shared loading/error/empty UI.
 
 ## Behavior & Edge Cases
@@ -87,7 +94,7 @@ calls.
 ```
 src/
   api/        client.ts  cache.ts  types.ts
-  hooks/      useLeagues.ts  useSeasonBadge.ts  useLeagueFilters.ts
+  hooks/      useLeagues.ts  useLeagueModalData.ts  useLeagueFilters.ts
   components/ App  SearchBar  SportFilter  LeagueList  LeagueCard  BadgeModal  StatusMessage
   test/       setup.ts
 ```

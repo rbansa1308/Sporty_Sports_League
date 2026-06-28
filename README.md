@@ -65,10 +65,17 @@ accessible focus handling (modal closes on Esc/overlay, focus is restored on clo
 
 ## API notes & known limitation
 
-This app targets two TheSportsDB endpoints:
+This app targets three TheSportsDB endpoints:
 
 - `all_leagues.php` → list of leagues (`idLeague`, `strLeague`, `strSport`)
-- `search_all_seasons.php?badge=1&id=<id>` → seasons with badge image URLs
+- `search_all_seasons.php?badge=1&id=<id>` → seasons with badge image URLs (the
+  modal shows the **most recent** season that has a badge)
+- `lookupleague.php?id=<id>` → per-league detail; used by the modal for
+  `strDescriptionEN` (and it also carries `strLeagueAlternate`)
+
+The modal loads the badge and the detail **in parallel** and degrades
+independently: a failure of one still shows the other, and the error/retry state
+appears only when both fail.
 
 **Free-key limitation:** with the public test key, `all_leagues.php` currently
 returns only a 10-league demo subset — all of them Soccer, and **without the

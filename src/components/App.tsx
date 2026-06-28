@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { League } from "../api/types";
 import { useLeagues } from "../hooks/useLeagues";
 import { useLeagueFilters } from "../hooks/useLeagueFilters";
@@ -15,8 +15,7 @@ export function App() {
   const [sport, setSport] = useState("");
   const [selected, setSelected] = useState<League | null>(null);
 
-  const filters = useMemo(() => ({ search, sport }), [search, sport]);
-  const { filtered, sportOptions } = useLeagueFilters(leagues, filters);
+  const { filtered, sportOptions } = useLeagueFilters(leagues, { search, sport });
 
   return (
     <div className={styles.page}>
@@ -80,6 +79,7 @@ function Content({ loading, error, retry, filtered, onSelect }: ContentProps) {
         title="Couldn’t load leagues"
         detail={error}
         onRetry={retry}
+        tone="error"
       />
     );
   }

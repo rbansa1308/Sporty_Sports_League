@@ -12,6 +12,14 @@ export interface Season {
   strBadge: string;
 }
 
+/** Extra detail for a single league, from `lookupleague.php`. */
+export interface LeagueDetail {
+  idLeague: string;
+  strLeague: string;
+  strLeagueAlternate: string;
+  strDescriptionEN: string | null;
+}
+
 /** Raw shapes of the API envelopes, used only at the client boundary. */
 export interface AllLeaguesResponse {
   leagues: League[] | null;
@@ -19,4 +27,8 @@ export interface AllLeaguesResponse {
 
 export interface AllSeasonsResponse {
   seasons: Season[] | null;
+}
+
+export interface LookupLeagueResponse {
+  leagues: LeagueDetail[] | null;
 }
