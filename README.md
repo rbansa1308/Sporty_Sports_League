@@ -99,3 +99,30 @@ Focused tests with Vitest + React Testing Library:
 - `SearchBar` / `SportFilter` — controlled inputs fire change callbacks
 - `BadgeModal` — renders the badge on success, falls back gracefully when none
   exists, and closes on Escape (API mocked)
+
+## AI tools & design decisions
+
+Built with **Claude Code** (Opus 4.8). The workflow used four assistive passes:
+
+- **Brainstorming** — pinned down scope and requirements before any code.
+- **Frontend-design** — drove the "floodlit stadium" visual direction.
+- **Grill-me** — stress-tested the design, surfacing decisions made by omission.
+- **Code review (high-effort)** — self-review that found and fixed 10 issues.
+
+Key decisions:
+
+- **Hand-rolled cache, no deps** — a generic `Map`-based cache dedupes in-flight
+  requests and evicts failures/empty results, so repeat calls hit memory, not the
+  network. Chosen over a data-fetching library to keep the caching logic explicit.
+- **Pure, testable core** — filtering and option-derivation are pure functions;
+  hooks own async/state. Logic is unit-tested without rendering.
+- **Combined modal fetch** — badge + league detail load in parallel
+  (`Promise.allSettled`) and degrade independently; the error state appears only
+  when both fail, so a flaky detail call never hides a good badge.
+- **Most-recent badge** — the modal shows the latest season's badge (more
+  recognizable) rather than the oldest the API lists first.
+- **Accessibility** — focus trap + restore, Escape/overlay close, body-scroll
+  lock, and `role="alert"` for errors.
+- **CSS Modules** — component-scoped styling with zero runtime cost.
+- **Honest about the free API** — no mock data; the free-key limitations above are
+  documented, and the code is premium-key-ready with no changes.
