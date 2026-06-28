@@ -2,7 +2,6 @@ import { createCache } from "./cache";
 import type {
   AllSeasonsResponse,
   League,
-  LeagueDetail,
   LookupLeagueResponse,
   Season,
   SearchLeaguesResponse,
@@ -40,7 +39,7 @@ const BASE_URL = `https://www.thesportsdb.com/api/v1/json/${API_KEY}`;
 // key by league id.
 const leaguesCache = createCache<League[]>();
 const badgeCache = createCache<Season | null>();
-const detailCache = createCache<LeagueDetail | null>();
+const descriptionCache = createCache<string | null>();
 
 async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url);
@@ -121,15 +120,15 @@ function findMostRecentBadge(seasons: Season[]): Season | null {
   return null;
 }
 
-/** Extra detail (description, alternate names) for a league. Cached per id. */
-export function getLeagueDetail(leagueId: string): Promise<LeagueDetail | null> {
-  return detailCache.getOrFetch(leagueId, async () => {
+/** A league's English description, or null if it has none. Cached per id. */
+export function getLeagueDetail(leagueId: string): Promise<string | null> {
+  return descriptionCache.getOrFetch(leagueId, async () => {
     const data = await fetchJson<LookupLeagueResponse>(
       `${BASE_URL}/lookupleague.php?id=${encodeURIComponent(leagueId)}`,
     );
-    const detail = data.leagues?.[0] ?? null;
+    const description = data.leagues?.[0]?.strDescriptionEN ?? null;
 
-    if (!detail) detailCache.evict(leagueId);
-    return detail;
+    if (!description) descriptionCache.evict(leagueId);
+    return description;
   });
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { League } from "../api/types";
+import type { League, Season } from "../api/types";
 import { useLeagueModalData } from "../hooks/useLeagueModalData";
 import styles from "./BadgeModal.module.css";
 
@@ -12,7 +12,7 @@ const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 export function BadgeModal({ league, onClose }: BadgeModalProps) {
-  const { badge, detail, loading, error, retry } = useLeagueModalData(league.idLeague);
+  const { badge, description, loading, error, retry } = useLeagueModalData(league.idLeague);
   const dialogRef = useRef<HTMLDivElement>(null);
 
   // Keep onClose current without making it an effect dependency: the effect
@@ -77,7 +77,7 @@ export function BadgeModal({ league, onClose }: BadgeModalProps) {
             loading={loading}
             error={error}
             badge={badge}
-            description={detail?.strDescriptionEN ?? null}
+            description={description}
             leagueName={league.strLeague}
             onRetry={retry}
           />
@@ -110,7 +110,7 @@ function trapFocus(event: KeyboardEvent, dialog: HTMLDivElement | null) {
 interface BadgeContentProps {
   loading: boolean;
   error: string | null;
-  badge: { strSeason: string; strBadge: string } | null;
+  badge: Season | null;
   description: string | null;
   leagueName: string;
   onRetry: () => void;

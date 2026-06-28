@@ -66,20 +66,11 @@ describe("getSeasonBadge", () => {
 });
 
 describe("getLeagueDetail", () => {
-  it("returns the first league detail entry", async () => {
-    mockFetchOnce({
-      leagues: [
-        {
-          idLeague: "1",
-          strLeague: "A",
-          strLeagueAlternate: "Alt",
-          strDescriptionEN: "A description.",
-        },
-      ],
-    });
+  it("returns the league's English description", async () => {
+    mockFetchOnce({ leagues: [{ strDescriptionEN: "A description." }] });
 
-    const detail = await getLeagueDetail("detail-league");
+    const description = await getLeagueDetail("detail-league");
 
-    expect(detail?.strDescriptionEN).toBe("A description.");
+    expect(description).toBe("A description.");
   });
 });

@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { getLeagueDetail, getSeasonBadge } from "../api/client";
-import type { LeagueDetail, Season } from "../api/types";
+import type { Season } from "../api/types";
 
 interface ModalData {
   badge: Season | null;
-  detail: LeagueDetail | null;
+  description: string | null;
   loading: boolean;
   error: string | null;
 }
 
-const IDLE: ModalData = { badge: null, detail: null, loading: false, error: null };
+const IDLE: ModalData = { badge: null, description: null, loading: false, error: null };
 
 function messageFrom(result: PromiseRejectedResult): string {
   return result.reason instanceof Error ? result.reason.message : "Failed to load";
@@ -31,18 +31,19 @@ export function useLeagueModalData(leagueId: string | null) {
     }
 
     let active = true;
-    setState({ badge: null, detail: null, loading: true, error: null });
+    setState({ badge: null, description: null, loading: true, error: null });
 
     Promise.allSettled([getSeasonBadge(leagueId), getLeagueDetail(leagueId)]).then(
-      ([badgeResult, detailResult]) => {
+      ([badgeResult, descriptionResult]) => {
         if (!active) return;
 
         const bothFailed =
-          badgeResult.status === "rejected" && detailResult.status === "rejected";
+          badgeResult.status === "rejected" && descriptionResult.status === "rejected";
 
         setState({
           badge: badgeResult.status === "fulfilled" ? badgeResult.value : null,
-          detail: detailResult.status === "fulfilled" ? detailResult.value : null,
+          description:
+            descriptionResult.status === "fulfilled" ? descriptionResult.value : null,
           loading: false,
           error: bothFailed ? messageFrom(badgeResult) : null,
         });

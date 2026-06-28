@@ -40,12 +40,7 @@ describe("BadgeModal", () => {
   });
 
   it("shows the league description when available", async () => {
-    mockedGetDetail.mockResolvedValue({
-      idLeague: "4328",
-      strLeague: "English Premier League",
-      strLeagueAlternate: "EPL",
-      strDescriptionEN: "The top tier of English football.",
-    });
+    mockedGetDetail.mockResolvedValue("The top tier of English football.");
 
     render(<BadgeModal league={league} onClose={() => {}} />);
 

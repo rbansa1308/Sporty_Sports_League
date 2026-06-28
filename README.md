@@ -120,7 +120,14 @@ Key decisions:
 
 - **Hand-rolled cache, no deps** — a generic `Map`-based cache dedupes in-flight
   requests and evicts failures/empty results, so repeat calls hit memory, not the
-  network. Chosen over a data-fetching library to keep the caching logic explicit.
+  network.
+
+  *Why not TanStack Query?* It's an excellent library, but for this scope a ~25-line
+  cache covers the "avoid repeat calls" requirement while keeping the dedup/eviction
+  mechanics explicit and dependency-free — and it demonstrates the caching reasoning
+  directly rather than delegating it. TanStack Query would earn its place once the
+  app needs background refetch / stale-while-revalidate, pagination, mutations with
+  cache invalidation, or built-in retries — none of which this app requires.
 - **Pure, testable core** — filtering and option-derivation are pure functions;
   hooks own async/state. Logic is unit-tested without rendering.
 - **Combined modal fetch** — badge + league detail load in parallel

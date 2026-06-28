@@ -12,14 +12,6 @@ export interface Season {
   strBadge: string;
 }
 
-/** Extra detail for a single league, from `lookupleague.php`. */
-export interface LeagueDetail {
-  idLeague: string;
-  strLeague: string;
-  strLeagueAlternate: string;
-  strDescriptionEN: string | null;
-}
-
 // Raw shapes of the API envelopes, used only at the client boundary.
 // `search_all_leagues.php` nests its league array under a "countries" key.
 export interface SearchLeaguesResponse {
@@ -30,6 +22,7 @@ export interface AllSeasonsResponse {
   seasons: Season[] | null;
 }
 
+// Only the description is consumed from `lookupleague.php`.
 export interface LookupLeagueResponse {
-  leagues: LeagueDetail[] | null;
+  leagues: Array<{ strDescriptionEN: string | null }> | null;
 }
