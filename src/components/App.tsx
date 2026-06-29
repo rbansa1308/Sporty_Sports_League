@@ -19,6 +19,10 @@ export function App() {
 
   return (
     <div className={styles.page}>
+      <a className={styles.skipLink} href="#main-content">
+        Skip to main content
+      </a>
+
       <header className={styles.header}>
         <div className={styles.brand}>
           <span className={styles.kicker}>The all-leagues directory</span>
@@ -36,16 +40,24 @@ export function App() {
           <SportFilter value={sport} options={sportOptions} onChange={setSport} />
         </div>
 
-        {!loading && !error && (
-          <p className={styles.count}>
-            <span className={styles.countNum}>{filtered.length}</span>
-            {filtered.length === 1 ? " league" : " leagues"}
-            {sport && ` in ${sport}`}
-          </p>
-        )}
+        {/* aria-live announces result count changes as the user filters */}
+        <p
+          className={styles.count}
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {!loading && !error && (
+            <>
+              <span className={styles.countNum}>{filtered.length}</span>
+              {filtered.length === 1 ? " league" : " leagues"}
+              {sport && ` in ${sport}`}
+            </>
+          )}
+        </p>
       </header>
 
-      <main className={styles.main}>
+      {/* aria-busy tells screen readers content is still loading */}
+      <main id="main-content" className={styles.main} aria-busy={loading}>
         <Content
           loading={loading}
           error={error}
