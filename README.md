@@ -37,7 +37,7 @@ cp .env.example .env
 ```
 src/
   api/        client.ts   cache.ts   types.ts
-  hooks/      useLeagues.ts   useSeasonBadge.ts   useLeagueFilters.ts
+  hooks/      useLeagues.ts   useLeagueModalData.ts   useLeagueFilters.ts
   components/ App  SearchBar  SportFilter  LeagueList  LeagueCard  BadgeModal  StatusMessage
   test/       setup.ts
 ```
@@ -47,11 +47,13 @@ src/
   concurrent/rapid requests for the same key **dedupe into a single network call**.
   Rejected fetches are evicted so a retry can succeed. This is the "cache responses
   to avoid repeat calls" requirement, hand-rolled with no dependencies.
-- **`api/client.ts`** — typed `getAllLeagues()` and `getSeasonBadge(leagueId)`,
-  each routed through its own cache instance.
-- **`hooks/`** — `useLeagues` loads the list once; `useSeasonBadge` lazily loads a
-  league's badge only when the modal opens; `useLeagueFilters` derives the filtered
-  list and the sport dropdown options (pure functions, memoized).
+- **`api/client.ts`** — typed `getAllLeagues()`, `getSeasonBadge(leagueId)`, and
+  `getLeagueDetail(leagueId)`, each routed through its own cache instance. Empty
+  results are evicted (not cached) so a retry can succeed.
+- **`hooks/`** — `useLeagues` loads the list once; `useLeagueModalData` loads a
+  league's badge **and** description in parallel when the modal opens;
+  `useLeagueFilters` derives the filtered list and the sport dropdown options
+  (pure functions, memoized).
 - **`components/`** — small, single-purpose components. `App` owns the filter and
   selection state; everything below is presentational.
 
@@ -61,7 +63,8 @@ A "floodlit stadium at night" aesthetic: near-black surfaces with a stadium-glow
 background, an electric volt-lime accent, condensed display type (Anton) for a
 broadcast/scoreboard feel, and a mono face for stat-line metadata. Responsive grid,
 animated card entrances, a spotlight badge modal, skeleton loading states, and
-accessible focus handling (modal closes on Esc/overlay, focus is restored on close).
+accessible focus handling (skip link, focus trap, modal closes on Esc/overlay,
+focus restored on close).
 
 ## API notes & known limitation
 
@@ -135,8 +138,9 @@ Key decisions:
   when both fail, so a flaky detail call never hides a good badge.
 - **Most-recent badge** — the modal shows the latest season's badge (more
   recognizable) rather than the oldest the API lists first.
-- **Accessibility** — focus trap + restore, Escape/overlay close, body-scroll
-  lock, and `role="alert"` for errors.
+- **Accessibility** — skip link, `aria-live` result count, focus trap + restore,
+  Escape/overlay close, body-scroll lock, labelled controls, and `role="alert"`
+  for errors.
 - **CSS Modules** — component-scoped styling with zero runtime cost.
 - **Honest about the free API** — no mock data; the free-key limitations above are
   documented, and the code is premium-key-ready with no changes.
