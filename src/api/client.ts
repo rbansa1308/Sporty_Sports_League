@@ -62,8 +62,7 @@ export function getAllLeagues(): Promise<League[]> {
     );
 
     // Fail loudly if every sport request errored — surface an error + retry
-    // rather than a misleading empty grid. (All-empty-but-no-errors is a genuine
-    // empty result and is allowed through.)
+    // rather than a misleading empty grid.
     if (leagues.length === 0) {
       const rejected = perSport.find((result) => result.status === "rejected");
       if (rejected?.status === "rejected") {
@@ -71,6 +70,12 @@ export function getAllLeagues(): Promise<League[]> {
           ? rejected.reason
           : new Error("Failed to load leagues");
       }
+
+      // All-empty-but-no-errors is a genuine empty result, but don't cache it:
+      // a transient empty response shouldn't pin the session to "no leagues"
+      // and leave the retry button hitting a cached empty array. Matches the
+      // evict-on-empty behavior of getSeasonBadge / getLeagueDetail below.
+      leaguesCache.evict("all");
     }
 
     return dedupeById(leagues);
@@ -131,4 +136,12 @@ export function getLeagueDetail(leagueId: string): Promise<string | null> {
     if (!description) descriptionCache.evict(leagueId);
     return description;
   });
+}
+
+// Test-only: the caches are module singletons that otherwise persist across
+// tests in the same file, making them order-dependent. Reset between tests.
+export function __resetCaches(): void {
+  leaguesCache.clear();
+  badgeCache.clear();
+  descriptionCache.clear();
 }

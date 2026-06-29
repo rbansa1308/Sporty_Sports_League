@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { App } from "./App";
+import { __resetCaches } from "../api/client";
 
 function countingFetch() {
   const fetchMock = vi.fn(async (url: string) => {
@@ -27,6 +28,9 @@ function countingFetch() {
   return fetchMock;
 }
 
+// Reset the module-singleton league cache before each test so every render
+// performs a real load instead of reading a previous test's cached result.
+beforeEach(() => __resetCaches());
 afterEach(() => vi.unstubAllGlobals());
 
 describe("App", () => {
@@ -44,6 +48,11 @@ describe("App", () => {
     render(<App />);
     await screen.findByText("English Premier League");
     const callsAfterLoad = fetchMock.mock.calls.length;
+
+    // Guard against a false green: the initial render must have actually hit the
+    // network (caches are reset before each test), so this isn't passing merely
+    // because a previous test warmed the cache.
+    expect(callsAfterLoad).toBeGreaterThan(0);
 
     // Typing in the search box re-renders and re-filters in memory; it must not
     // trigger any new network requests.

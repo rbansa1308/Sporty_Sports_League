@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { getAllLeagues, getLeagueDetail, getSeasonBadge } from "./client";
+import { __resetCaches, getAllLeagues, getLeagueDetail, getSeasonBadge } from "./client";
 
 function mockFetchOnce(payload: unknown, ok = true, status = 200) {
   const fetchMock = vi.fn().mockResolvedValue({
@@ -13,6 +13,8 @@ function mockFetchOnce(payload: unknown, ok = true, status = 200) {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  // Reset module-singleton caches so tests don't leak state into each other.
+  __resetCaches();
 });
 
 describe("getAllLeagues", () => {
@@ -35,6 +37,26 @@ describe("getAllLeagues", () => {
     const leagues = await getAllLeagues();
 
     expect(leagues.map((l) => l.idLeague)).toEqual(["1", "2"]);
+  });
+
+  it("does not cache an empty (but error-free) result, so a retry re-fetches", async () => {
+    // First load: every sport responds OK but with no leagues.
+    const emptyFetch = mockFetchOnce({ countries: null });
+    const first = await getAllLeagues();
+    expect(first).toEqual([]);
+
+    // A later call must hit the network again rather than returning the cached
+    // empty array — this is what makes the UI's retry button actually work.
+    const populatedFetch = mockFetchOnce({
+      countries: [
+        { idLeague: "1", strLeague: "A", strSport: "Soccer", strLeagueAlternate: "x" },
+      ],
+    });
+    const second = await getAllLeagues();
+
+    expect(emptyFetch).toHaveBeenCalled();
+    expect(populatedFetch).toHaveBeenCalled();
+    expect(second.map((l) => l.idLeague)).toEqual(["1"]);
   });
 });
 

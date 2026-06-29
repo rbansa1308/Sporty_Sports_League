@@ -50,6 +50,20 @@ describe("createCache", () => {
     expect(fetcher).toHaveBeenCalledTimes(2);
   });
 
+  it("re-fetches every key after clear()", async () => {
+    const cache = createCache<number>();
+    const fetcher = vi.fn().mockResolvedValue(5);
+
+    await cache.getOrFetch("a", fetcher);
+    await cache.getOrFetch("b", fetcher);
+    cache.clear();
+    await cache.getOrFetch("a", fetcher);
+    await cache.getOrFetch("b", fetcher);
+
+    // Two keys, fetched once each before clear and once each after = 4.
+    expect(fetcher).toHaveBeenCalledTimes(4);
+  });
+
   it("does not cache a rejected fetch, allowing a retry", async () => {
     const cache = createCache<number>();
     const fetcher = vi
