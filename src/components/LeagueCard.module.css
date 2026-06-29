@@ -96,3 +96,16 @@
   transform: translateX(0);
   color: var(--volt);
 }
+
+/* Defined here (not in global index.css) so CSS Modules scopes the keyframe
+   name to match the scoped `animation` reference above. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

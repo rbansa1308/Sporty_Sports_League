@@ -12,11 +12,16 @@ export function LeagueCard({ league, index, onSelect }: LeagueCardProps) {
   // Stagger the entrance, capped so long lists don't wait too long.
   const style = { animationDelay: `${Math.min(index, 12) * 45}ms` } as CSSProperties;
 
+  const label = league.strLeagueAlternate
+    ? `${league.strLeague} (${league.strLeagueAlternate}), ${league.strSport}`
+    : `${league.strLeague}, ${league.strSport}`;
+
   return (
     <button
       type="button"
       className={styles.card}
       style={style}
+      aria-label={label}
       onClick={() => onSelect(league)}
     >
       <span className={styles.sport}>{league.strSport}</span>

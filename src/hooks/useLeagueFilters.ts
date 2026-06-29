@@ -26,10 +26,13 @@ export function filterLeagues(leagues: League[], filters: LeagueFilters): League
 
 /** Memoized filtered list plus the sport dropdown options. */
 export function useLeagueFilters(leagues: League[], filters: LeagueFilters) {
+  const { search, sport } = filters;
   const sportOptions = useMemo(() => getSportOptions(leagues), [leagues]);
+  // Key on the primitive filter values, not the object's identity, so callers
+  // can pass an inline { search, sport } without defeating memoization.
   const filtered = useMemo(
-    () => filterLeagues(leagues, filters),
-    [leagues, filters],
+    () => filterLeagues(leagues, { search, sport }),
+    [leagues, search, sport],
   );
 
   return { filtered, sportOptions };

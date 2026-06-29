@@ -6,6 +6,9 @@ dist-ssr
 .env.*
 !.env.example
 
+# Local-only docs (intentionally not committed)
+CODEBASE_GUIDE.md
+
 # Editor / OS
 .DS_Store
 .vscode/*
